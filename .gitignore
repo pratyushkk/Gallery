@@ -13,6 +13,7 @@ local.properties
 # Log files
 *.log
 crash.txt
+*.apk
 
 # Android Studio / IntelliJ IDEA
 .idea/

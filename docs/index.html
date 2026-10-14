@@ -1,0 +1,613 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Gallery - Fast, Fluid Native Android Gallery</title>
+  <meta name="description" content="A blazing fast, fluid native Android Gallery app inspired by Samsung One UI, engineered for 90Hz & 120Hz displays with biometric vault and offline privacy.">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg: #0a0b0e;
+      --surface: #13141a;
+      --surface-card: #181922;
+      --surface-hover: #20222e;
+      --border: #262835;
+      --border-light: #34374a;
+      --primary: #3b82f6;
+      --primary-hover: #2563eb;
+      --primary-glow: rgba(59, 130, 246, 0.35);
+      --accent-cyan: #06b6d4;
+      --accent-gold: #f59e0b;
+      --accent-green: #10b981;
+      --text: #f3f4f6;
+      --text-muted: #9ca3af;
+      --text-dim: #6b7280;
+      --radius-sm: 8px;
+      --radius-md: 16px;
+      --radius-lg: 24px;
+      --radius-full: 9999px;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      background-color: var(--bg);
+      color: var(--text);
+      line-height: 1.6;
+      overflow-x: hidden;
+      -webkit-font-smoothing: antialiased;
+    }
+
+    /* Background glow decorations */
+    .glow-bg {
+      position: absolute;
+      top: 0;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 100vw;
+      height: 800px;
+      background: radial-gradient(circle at 50% 15%, rgba(59, 130, 246, 0.15) 0%, rgba(6, 182, 212, 0.08) 35%, transparent 70%);
+      pointer-events: none;
+      z-index: 0;
+    }
+
+    /* Container */
+    .container {
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 0 24px;
+      position: relative;
+      z-index: 1;
+    }
+
+    /* Navigation Bar */
+    header {
+      padding: 24px 0;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+      position: sticky;
+      top: 0;
+      background: rgba(10, 11, 14, 0.85);
+      backdrop-filter: blur(12px);
+      z-index: 100;
+    }
+
+    .nav-inner {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .logo {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      text-decoration: none;
+      color: var(--text);
+      font-weight: 700;
+      font-size: 1.25rem;
+    }
+
+    .logo-icon {
+      width: 36px;
+      height: 36px;
+      border-radius: 10px;
+      background: linear-gradient(135deg, #3b82f6, #06b6d4);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      box-shadow: 0 4px 12px var(--primary-glow);
+    }
+
+    .logo-icon svg {
+      width: 20px;
+      height: 20px;
+      fill: #ffffff;
+    }
+
+    .nav-links {
+      display: flex;
+      align-items: center;
+      gap: 20px;
+    }
+
+    .nav-link {
+      color: var(--text-muted);
+      text-decoration: none;
+      font-size: 0.95rem;
+      font-weight: 500;
+      transition: color 0.2s;
+    }
+
+    .nav-link:hover {
+      color: var(--text);
+    }
+
+    .btn-nav {
+      background: var(--surface-card);
+      border: 1px solid var(--border);
+      color: var(--text);
+      padding: 8px 18px;
+      border-radius: var(--radius-full);
+      text-decoration: none;
+      font-size: 0.9rem;
+      font-weight: 600;
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      transition: all 0.2s ease;
+    }
+
+    .btn-nav:hover {
+      background: var(--surface-hover);
+      border-color: var(--primary);
+    }
+
+    /* Hero Section */
+    .hero {
+      padding: 80px 0 60px;
+      text-align: center;
+    }
+
+    .badge-pill {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 6px 16px;
+      background: rgba(59, 130, 246, 0.1);
+      border: 1px solid rgba(59, 130, 246, 0.25);
+      border-radius: var(--radius-full);
+      font-size: 0.85rem;
+      font-weight: 600;
+      color: #60a5fa;
+      margin-bottom: 24px;
+    }
+
+    .badge-dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background: var(--accent-green);
+      box-shadow: 0 0 8px var(--accent-green);
+    }
+
+    .hero h1 {
+      font-size: clamp(2.5rem, 6vw, 4.25rem);
+      font-weight: 800;
+      line-height: 1.15;
+      letter-spacing: -0.03em;
+      margin-bottom: 20px;
+      background: linear-gradient(180deg, #ffffff 30%, #9ca3af 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+
+    .hero p {
+      font-size: clamp(1.05rem, 2vw, 1.25rem);
+      color: var(--text-muted);
+      max-width: 680px;
+      margin: 0 auto 36px;
+      font-weight: 400;
+    }
+
+    .hero-actions {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      gap: 16px;
+      flex-wrap: wrap;
+      margin-bottom: 50px;
+    }
+
+    .btn-primary {
+      background: linear-gradient(135deg, #2563eb, #3b82f6);
+      color: #ffffff;
+      padding: 14px 32px;
+      border-radius: var(--radius-full);
+      text-decoration: none;
+      font-weight: 700;
+      font-size: 1.05rem;
+      display: inline-flex;
+      align-items: center;
+      gap: 10px;
+      box-shadow: 0 8px 24px var(--primary-glow);
+      transition: all 0.25s ease;
+      border: 1px solid rgba(255, 255, 255, 0.15);
+    }
+
+    .btn-primary:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 12px 32px rgba(59, 130, 246, 0.5);
+    }
+
+    .btn-secondary {
+      background: var(--surface-card);
+      border: 1px solid var(--border);
+      color: var(--text);
+      padding: 14px 28px;
+      border-radius: var(--radius-full);
+      text-decoration: none;
+      font-weight: 600;
+      font-size: 1.05rem;
+      display: inline-flex;
+      align-items: center;
+      gap: 10px;
+      transition: all 0.25s ease;
+    }
+
+    .btn-secondary:hover {
+      background: var(--surface-hover);
+      border-color: var(--border-light);
+      transform: translateY(-2px);
+    }
+
+    /* Device Showcase */
+    .showcase-row {
+      display: flex;
+      justify-content: center;
+      gap: 24px;
+      margin: 40px auto;
+      overflow-x: auto;
+      padding: 20px 0 40px;
+      scrollbar-width: thin;
+      scrollbar-color: var(--border) transparent;
+    }
+
+    .device-card {
+      flex: 0 0 260px;
+      background: var(--surface-card);
+      border: 2px solid var(--border);
+      border-radius: 36px;
+      padding: 10px;
+      box-shadow: 0 20px 40px rgba(0, 0, 0, 0.6);
+      transition: transform 0.3s ease, border-color 0.3s ease;
+    }
+
+    .device-card:hover {
+      transform: translateY(-8px);
+      border-color: var(--primary);
+    }
+
+    .device-card img {
+      width: 100%;
+      height: auto;
+      border-radius: 28px;
+      display: block;
+      background: #000000;
+    }
+
+    .device-caption {
+      text-align: center;
+      padding: 12px 0 6px;
+      font-size: 0.85rem;
+      font-weight: 600;
+      color: var(--text-muted);
+    }
+
+    /* Features Grid */
+    .features-section {
+      padding: 80px 0;
+      border-top: 1px solid var(--border);
+    }
+
+    .section-header {
+      text-align: center;
+      margin-bottom: 60px;
+    }
+
+    .section-header h2 {
+      font-size: clamp(2rem, 4vw, 2.75rem);
+      font-weight: 800;
+      letter-spacing: -0.02em;
+      margin-bottom: 12px;
+    }
+
+    .section-header p {
+      color: var(--text-muted);
+      font-size: 1.1rem;
+      max-width: 600px;
+      margin: 0 auto;
+    }
+
+    .grid-3 {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+      gap: 24px;
+    }
+
+    .feature-card {
+      background: var(--surface-card);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-lg);
+      padding: 32px;
+      transition: all 0.25s ease;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .feature-card:hover {
+      border-color: var(--border-light);
+      background: var(--surface-hover);
+      transform: translateY(-4px);
+    }
+
+    .feature-icon {
+      width: 48px;
+      height: 48px;
+      border-radius: var(--radius-md);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin-bottom: 20px;
+    }
+
+    .icon-blue { background: rgba(59, 130, 246, 0.15); color: #60a5fa; }
+    .icon-cyan { background: rgba(6, 182, 212, 0.15); color: #22d3ee; }
+    .icon-gold { background: rgba(245, 158, 11, 0.15); color: #fbbf24; }
+    .icon-green { background: rgba(16, 185, 129, 0.15); color: #34d399; }
+    .icon-red { background: rgba(239, 68, 68, 0.15); color: #f87171; }
+    .icon-purple { background: rgba(168, 85, 247, 0.15); color: #c084fc; }
+
+    .feature-card h3 {
+      font-size: 1.35rem;
+      font-weight: 700;
+      margin-bottom: 10px;
+      color: #ffffff;
+    }
+
+    .feature-card p {
+      color: var(--text-muted);
+      font-size: 0.95rem;
+      line-height: 1.6;
+    }
+
+    /* Specs & Architecture Section */
+    .specs-section {
+      padding: 60px 0 80px;
+      border-top: 1px solid var(--border);
+    }
+
+    .specs-box {
+      background: var(--surface-card);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-lg);
+      padding: 40px;
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+      gap: 32px;
+    }
+
+    .spec-item h4 {
+      font-size: 0.85rem;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      color: var(--text-dim);
+      margin-bottom: 8px;
+    }
+
+    .spec-item .spec-val {
+      font-size: 1.5rem;
+      font-weight: 700;
+      color: #ffffff;
+    }
+
+    .spec-item .spec-desc {
+      font-size: 0.85rem;
+      color: var(--text-muted);
+      margin-top: 4px;
+    }
+
+    /* Footer */
+    footer {
+      border-top: 1px solid var(--border);
+      padding: 48px 0;
+      text-align: center;
+      color: var(--text-dim);
+      font-size: 0.9rem;
+    }
+
+    footer a {
+      color: var(--text-muted);
+      text-decoration: none;
+      transition: color 0.2s;
+    }
+
+    footer a:hover {
+      color: var(--text);
+    }
+
+    .footer-links {
+      display: flex;
+      justify-content: center;
+      gap: 24px;
+      margin-bottom: 16px;
+    }
+
+    @media (max-width: 768px) {
+      .hero { padding: 50px 0 40px; }
+      .showcase-row { justify-content: flex-start; padding-left: 12px; }
+      .device-card { flex: 0 0 220px; }
+      .specs-box { padding: 24px; }
+    }
+  </style>
+</head>
+<body>
+  <div class="glow-bg"></div>
+
+  <header>
+    <div class="container nav-inner">
+      <a href="#" class="logo">
+        <div class="logo-icon">
+          <svg viewBox="0 0 24 24"><path d="M21 19V5c0-1.1-.9-2-2-2H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2zM8.5 13.5l2.5 3.01L14.5 12l4.5 6H5l3.5-4.5z"/></svg>
+        </div>
+        <span>Gallery</span>
+      </a>
+      <div class="nav-links">
+        <a href="#features" class="nav-link">Features</a>
+        <a href="#specs" class="nav-link">Architecture</a>
+        <a href="https://github.com/pratyushkk/Gallery" target="_blank" class="btn-nav">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><path d="M12 0C5.37 0 0 5.37 0 12c0 5.31 3.435 9.795 8.205 11.385.6.105.825-.255.825-.57 0-.285-.015-1.23-.015-2.235-3.015.555-3.795-.735-4.035-1.41-.135-.345-.72-1.41-1.23-1.695-.42-.225-1.02-.78-.015-.795.945-.015 1.62.87 1.845 1.23 1.08 1.815 2.805 1.305 3.495.99.105-.78.42-1.305.765-1.605-2.67-.3-5.46-1.335-5.46-5.925 0-1.305.465-2.385 1.23-3.225-.12-.3-.54-1.53.12-3.18 0 0 1.005-.315 3.3 1.23.96-.27 1.98-.405 3-.405s2.04.135 3 .405c2.295-1.56 3.3-1.23 3.3-1.23.66 1.65.24 2.88.12 3.18.765.84 1.23 1.905 1.23 3.225 0 4.605-2.805 5.625-5.475 5.925.435.375.81 1.095.81 2.22 0 1.605-.015 2.895-.015 3.3 0 .315.225.69.825.57A12.02 12.02 0 0024 12c0-6.63-5.37-12-12-12z"/></svg>
+          <span>GitHub</span>
+        </a>
+      </div>
+    </div>
+  </header>
+
+  <main>
+    <section class="hero">
+      <div class="container">
+        <div class="badge-pill">
+          <span class="badge-dot"></span>
+          <span>One UI Design &bull; 120 Hz Native Jetpack Compose</span>
+        </div>
+        <h1>The Ultra-Smooth Native<br>Gallery for Android</h1>
+        <p>
+          Engineered for 90Hz & 120Hz displays. Zero lag, 32-bit razor-sharp previews, hardware-encrypted biometric vault, and effortless gesture swiping.
+        </p>
+
+        <div class="hero-actions">
+          <a href="https://github.com/pratyushkk/Gallery/releases/latest/download/app-release.apk" class="btn-primary">
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="currentColor"><path d="M19 9h-4V3H9v6H5l7 7 7-7zM5 18v2h14v-2H5z"/></svg>
+            <span>Download APK (v1.0.0)</span>
+          </a>
+          <a href="https://github.com/pratyushkk/Gallery" target="_blank" class="btn-secondary">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2C6.477 2 2 6.477 2 12c0 4.42 2.865 8.17 6.839 9.49.5.092.682-.217.682-.482 0-.237-.008-.866-.013-1.7-2.782.603-3.369-1.34-3.369-1.34-.454-1.156-1.11-1.463-1.11-1.463-.908-.62.069-.608.069-.608 1.003.07 1.53 1.03 1.53 1.03.892 1.529 2.341 1.087 2.91.831.092-.646.35-1.086.636-1.336-2.22-.253-4.555-1.11-4.555-4.943 0-1.091.39-1.984 1.029-2.683-.103-.253-.446-1.27.098-2.647 0 0 .84-.269 2.75 1.025A9.578 9.578 0 0112 6.836c.85.004 1.705.114 2.504.336 1.909-1.294 2.747-1.025 2.747-1.025.546 1.377.203 2.394.1 2.647.64.699 1.028 1.592 1.028 2.683 0 3.842-2.339 4.687-4.566 4.935.359.309.678.919.678 1.852 0 1.336-.012 2.415-.012 2.743 0 .267.18.578.688.48C19.138 20.167 22 16.418 22 12c0-5.523-4.477-10-10-10z"/></svg>
+            <span>Source Code</span>
+          </a>
+        </div>
+
+        <!-- Phone Screenshots Carousel -->
+        <div class="showcase-row">
+          <div class="device-card">
+            <img src="assets/screenshots/screenshot_photos.png" alt="Photos Screen Grid" loading="lazy">
+            <div class="device-caption">Photos &bull; Chronological Grid</div>
+          </div>
+          <div class="device-card">
+            <img src="assets/screenshots/screenshot_albums.png" alt="Albums Screen" loading="lazy">
+            <div class="device-caption">Albums &bull; System & Custom</div>
+          </div>
+          <div class="device-card">
+            <img src="assets/screenshots/screenshot_search.png" alt="Smart Search Screen" loading="lazy">
+            <div class="device-caption">Search &bull; Smart Categories</div>
+          </div>
+          <div class="device-card">
+            <img src="assets/screenshots/screenshot_locker.png" alt="Secured Locker" loading="lazy">
+            <div class="device-caption">Locker &bull; Biometric Vault</div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Features -->
+    <section class="features-section" id="features">
+      <div class="container">
+        <div class="section-header">
+          <h2>Engineered for Performance</h2>
+          <p>Every frame, decode pipeline, and gesture touch event is fine-tuned for high-refresh Android hardware.</p>
+        </div>
+
+        <div class="grid-3">
+          <div class="feature-card">
+            <div class="feature-icon icon-blue">
+              <svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor"><path d="M13 2.05v3.03c3.39.49 6 3.39 6 6.92 0 .9-.18 1.75-.48 2.54l2.6 1.53c.56-1.24.88-2.62.88-4.07 0-5.18-3.95-9.45-9-9.95zM12 19c-3.87 0-7-3.13-7-7 0-3.53 2.61-6.43 6-6.92V2.05c-5.06.5-9 4.76-9 9.95 0 5.52 4.47 10 9.99 10 3.31 0 6.24-1.61 8.01-4.09l-2.45-1.45C16.27 18.06 14.28 19 12 19z"/></svg>
+            </div>
+            <h3>90Hz & 120Hz Fluid Motion</h3>
+            <p>Calculated frame budgets (11.1ms for 90Hz, 8.3ms for 120Hz). Heavy bitmap decodes, MediaStore queries, and crypto run off the UI thread via Kotlin Coroutines.</p>
+          </div>
+
+          <div class="feature-card">
+            <div class="feature-icon icon-cyan">
+              <svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor"><path d="M21 3H3C2 3 1 4 1 5v14c0 1.1.9 2 2 2h18c1 0 2-.9 2-2V5c0-1-1-2-2-2zm0 16.01H3V4.99h18v14.02zM8 16h2.5l1.5-1.5 1.5 1.5H16l-3.5-4.5L8 16z"/></svg>
+            </div>
+            <h3>32-Bit Razor Previews</h3>
+            <p>Direct uncompressed stream decoding with hardware-backed ARGB_8888 color. Eliminates blurry 70% micro-thumbnails and muddy RGB_565 AMOLED color banding.</p>
+          </div>
+
+          <div class="feature-card">
+            <div class="feature-icon icon-gold">
+              <svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor"><path d="M18 8h-1V6c0-2.76-2.24-5-5-5S7 3.24 7 6v2H6c-1.1 0-2 .9-2 2v10c0 1.1.9 2 2 2h12c1.1 0 2-.9 2-2V10c0-1.1-.9-2-2-2zm-6 9c-1.1 0-2-.9-2-2s.9-2 2-2 2 .9 2 2-.9 2-2 2zm3.1-9H8.9V6c0-1.71 1.39-3.1 3.1-3.1 1.71 0 3.1 1.39 3.1 3.1v2z"/></svg>
+            </div>
+            <h3>Biometric Vault (Locker)</h3>
+            <p>Hardware-backed Android BiometricPrompt (Fingerprint / Face / PIN) with AES-256 GCM encryption. Hidden from other apps and safe in isolated app storage.</p>
+          </div>
+
+          <div class="feature-card">
+            <div class="feature-icon icon-green">
+              <svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor"><path d="M10 9h4V6h3l-5-5-5 5h3v3zm-1 1H6v3l-5-5 5-5v3h3v4zm6 0v-4h3V3l5 5-5 5v-3h-3zm-1 1v4h3l-5 5-5-5h3v-4h4z"/></svg>
+            </div>
+            <h3>Full Swipe & Gesture Physics</h3>
+            <p>Swipe horizontally across bottom menu tabs (Photos &bull; Albums &bull; Search) and swipe seamlessly between full-screen photos with synchronized bottom filmstrip scrubbing.</p>
+          </div>
+
+          <div class="feature-card">
+            <div class="feature-icon icon-red">
+              <svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor"><path d="M16 9v10H8V9h8m-1.5-6h-5l-1 1H5v2h14V4h-3.5l-1-1zM18 7H6v12c0 1.1.9 2 2 2h8c1.1 0 2-.9 2-2V7z"/></svg>
+            </div>
+            <h3>30-Day Recycle Bin</h3>
+            <p>Prevents accidental data loss. Media can be recovered anytime within 30 days or permanently purged with a single tap.</p>
+          </div>
+
+          <div class="feature-card">
+            <div class="feature-icon icon-purple">
+              <svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor"><path d="M15.5 14h-.79l-.28-.27A6.471 6.471 0 0 0 16 9.5 6.5 6.5 0 1 0 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19l-4.99-5zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14z"/></svg>
+            </div>
+            <h3>Real-Time Sync & Search</h3>
+            <p>ContentObserver monitors MediaStore for external camera captures, downloads, and deletions. Instant search with smart category filters.</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Architecture & Specs -->
+    <section class="specs-section" id="specs">
+      <div class="container">
+        <div class="section-header">
+          <h2>Technical Architecture</h2>
+          <p>Built exclusively with modern Android standards.</p>
+        </div>
+
+        <div class="specs-box">
+          <div class="spec-item">
+            <h4>Target Displays</h4>
+            <div class="spec-val">90 / 120 Hz</div>
+            <div class="spec-desc">High refresh rate native fling & gestures</div>
+          </div>
+          <div class="spec-item">
+            <h4>UI Framework</h4>
+            <div class="spec-val">Compose 2.0</div>
+            <div class="spec-desc">100% Jetpack Compose BOM 2024.12</div>
+          </div>
+          <div class="spec-item">
+            <h4>Security</h4>
+            <div class="spec-val">AES-256 GCM</div>
+            <div class="spec-desc">AndroidKeyStore encrypted private vault</div>
+          </div>
+          <div class="spec-item">
+            <h4>Image Pipeline</h4>
+            <div class="spec-val">Coil 2.7.0</div>
+            <div class="spec-desc">Two-tier LRU memory (25%) + disk cache (250MB)</div>
+          </div>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <footer>
+    <div class="container">
+      <div class="footer-links">
+        <a href="https://github.com/pratyushkk/Gallery" target="_blank">GitHub</a>
+        <a href="https://github.com/pratyushkk/Gallery/releases" target="_blank">Releases</a>
+        <a href="https://github.com/pratyushkk/Gallery/blob/main/LICENSE" target="_blank">License</a>
+      </div>
+      <p>&copy; 2026 Gallery. Open source native Android application.</p>
+    </div>
+  </footer>
+</body>
+</html>

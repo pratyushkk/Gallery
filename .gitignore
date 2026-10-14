@@ -1,0 +1,36 @@
+# Gradle files
+.gradle/
+build/
+*/build/
+app/build/
+
+# Kotlin
+.kotlin/
+
+# Local configuration file (SDK path, etc)
+local.properties
+
+# Log files
+*.log
+crash.txt
+
+# Android Studio / IntelliJ IDEA
+.idea/
+*.iml
+.navigation/
+captures/
+.externalNativeBuild
+.cxx/
+
+# VS Code
+.vscode/
+
+# Temporary / Scratch files
+*.py
+*.js
+*_backup.*
+sc_*.png
+
+# OS-specific files
+.DS_Store
+Thumbs.db
